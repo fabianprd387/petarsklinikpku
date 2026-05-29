@@ -13,6 +13,8 @@
         <link rel="stylesheet" href="css/fontawesome-all.min.css">
         <link rel="stylesheet" href="css/leaflet.photon.css">
         <link rel="stylesheet" href="css/leaflet-measure.css">
+		<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css"/>
+		<script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.min.js"></script>
         <style>
         html, body, #map {
             width: 100%;
@@ -21,6 +23,7 @@
             margin: 0;
         }
         </style>
+		
         <title></title>
     </head>
     <body>
@@ -517,6 +520,42 @@
         });
         lay.addTo(map);
         setBounds();
+			// Ambil lokasi user dulu
+navigator.geolocation.getCurrentPosition(function(position) {
+    var userLat = position.coords.latitude;
+    var userLng = position.coords.longitude;
+
+    // Koordinat tujuan (ganti sesuai lokasi yang dituju)
+    var tujuanLat = -6.9175;
+    var tujuanLng = 107.6191;
+
+    // Buat routing
+    L.Routing.control({
+        waypoints: [
+            L.latLng(userLat, userLng),      // titik asal = lokasi user
+            L.latLng(tujuanLat, tujuanLng)   // titik tujuan
+        ],
+        routeWhileDragging: true,
+        language: 'id',                        // bahasa Indonesia
+        show: true                             // tampilkan panel petunjuk arah
+    }).addTo(map);
+});
+			var routingControl = null;
+
+map.on('click', function(e) {
+    // Hapus rute sebelumnya
+    if (routingControl) map.removeControl(routingControl);
+
+    navigator.geolocation.getCurrentPosition(function(position) {
+        routingControl = L.Routing.control({
+            waypoints: [
+                L.latLng(position.coords.latitude, position.coords.longitude),
+                L.latLng(e.latlng.lat, e.latlng.lng) // titik yang diklik
+            ],
+            routeWhileDragging: true
+        }).addTo(map);
+    });
+});
         </script>        
     </body>
 </html>
